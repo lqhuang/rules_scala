@@ -87,11 +87,11 @@ See the official [linker implementation](https://github.com/scala-js/scala-js/bl
 [classpath reader](https://github.com/scala-js/scala-js/blob/v1.22.0/linker/jvm/src/main/scala/org/scalajs/linker/PathIRContainer.scala),
 and [output directory](https://github.com/scala-js/scala-js/blob/v1.22.0/linker/jvm/src/main/scala/org/scalajs/linker/PathOutputDirectory.scala).
 
-The MVP uses the default `NoModule` and `FewestModules` configuration, enables
-the Scala.js optimizer, disables source maps, disables parallel linking for
-stable action behavior, and links in an action-private directory before moving
-`main.js` to the declared Bazel output. Closure Compiler is present in the
-linker's published graph but remains disabled by the standard configuration.
+The MVP uses the default `NoModule`, `FewestModules`, and parallel-linking
+configuration, enables the Scala.js optimizer, disables source maps, and links
+in an action-private directory before moving `main.js` to the declared Bazel
+output. Closure Compiler is present in the linker's published graph but remains
+disabled by the standard configuration.
 
 The executable and test launchers resolve Node from
 [`rules_nodejs`](https://registry.bazel.build/modules/rules_nodejs) 6.7.5.

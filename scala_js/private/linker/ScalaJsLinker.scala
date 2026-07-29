@@ -64,7 +64,6 @@ object ScalaJsLinker {
         StandardConfig()
           .withSourceMap(false)
           .withBatchMode(true)
-          .withParallel(false)
       )
       val initializers = List(
         ModuleInitializer.mainMethodWithArgs(options.mainClass, "main")
