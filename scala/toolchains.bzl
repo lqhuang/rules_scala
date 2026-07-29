@@ -12,6 +12,7 @@ load(
 )
 load("//scala/private:toolchain_defaults.bzl", "TOOLCHAIN_DEFAULTS")
 load("//scala/scalafmt:scalafmt_repositories.bzl", "scalafmt_artifact_ids")
+load("//scala_js:repositories.bzl", "scala_js_artifact_ids")
 load("//scala_native:repositories.bzl", "scala_native_artifact_ids")
 load("//scala_proto/default:repositories.bzl", "scala_proto_artifact_ids")
 load("//scalatest:scalatest.bzl", "scalatest_artifact_ids")
@@ -94,6 +95,7 @@ def scala_toolchains(
         specs2 = False,
         scalafmt = False,
         scala_proto = False,
+        scala_js = False,
         jmh = False,
         twitter_scrooge = False,
         scala_native = False):
@@ -142,6 +144,7 @@ def scala_toolchains(
             - default_config: default Scalafmt config file target
         scala_proto: boolean or dictionary of `setup_scala_proto_toolchain()`
             options
+        scala_js: whether to instantiate the Scala.js toolchain
         jmh: whether to instantiate the Java Microbenchmarks Harness toolchain
         twitter_scrooge: bool or dictionary of `setup_scrooge_toolchain()`
             options
@@ -198,6 +201,11 @@ def scala_toolchains(
                 id: fetch_sources
                 for id in scala_version_artifact_ids(scala_version)
             })
+        if scala_js:
+            version_specific_artifact_ids.update({
+                id: False
+                for id in scala_js_artifact_ids(scala_version)
+            })
 
         if scala_proto:
             version_specific_artifact_ids.update({
@@ -245,6 +253,7 @@ def scala_toolchains(
         scalafmt_default_config = scalafmt_options["default_config"],
         scala_proto = scala_proto,
         scala_proto_options = scala_proto_options["default_gen_opts"],
+        scala_js = scala_js,
         jmh = jmh,
         twitter_scrooge = twitter_scrooge,
         # When the minimum Bazel version is 7.4 or later, change this attribute to

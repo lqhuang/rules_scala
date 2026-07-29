@@ -34,6 +34,10 @@ artifacts = {
         "sha256": "84d3a150518485f8140ea99b8a985656749629f6433c92b80c75b36aba3b099b",
         "srcjar_sha256": "295938307f4016b3f128f7347101b236ada1394808104519c9e93cd61b64602b",
     },
+    "com_google_javascript_closure_compiler": {
+        "artifact": "com.google.javascript:closure-compiler:v20220202",
+        "sha256": "23d91c2bda0be80312b48ede19faee27e09842e02c56c8b14f3921d09589af0f",
+    },
     "com_google_protobuf_protobuf_java": {
         "artifact": "com.google.protobuf:protobuf-java:4.33.5",
         "sha256": "cb9e00d6e3d4b1305f3fdc147490ce347bfe8c05dc821a433b23b2ff28749bb1",
@@ -569,6 +573,73 @@ artifacts = {
             "@org_jline_jline_terminal",
             "@org_jline_jline_terminal_jni",
             "@org_virtuslab_using_directives",
+        ],
+    },
+    "org_scala_lang_modules_scala_parallel_collections_3": {
+        "artifact": "org.scala-lang.modules:scala-parallel-collections_3:1.2.0",
+        "sha256": "de814a415584199a6e3e680319d16b25c069aa69db08938c97c04f4b28e54a84",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+        ],
+    },
+    "org_scala_js_scalajs_ir": {
+        "artifact": "org.scala-js:scalajs-ir_3:1.22.0",
+        "sha256": "feb377da78e5e3b3bb4e31566e8728940f1315b3b51226717e76a3289b6dc6ff",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+        ],
+    },
+    "org_scala_js_scalajs_javalib": {
+        "artifact": "org.scala-js:scalajs-javalib:1.22.0",
+        "sha256": "aedc43bf2c51e66bc6c6ff2bd5ab0a7829788b6b601ca7271b0cf79cf5fb9caf",
+    },
+    "org_scala_js_scalajs_javalib_intf": {
+        "artifact": "org.scala-js:scalajs-javalib-intf:1.22.0",
+        "sha256": "d18c4e93c981e7bcce65a1ea4a8f99fabd16fcaf9988cb2a76b75686ee4ebd93",
+    },
+    "org_scala_js_scalajs_library": {
+        "artifact": "org.scala-js:scalajs-library_2.13:1.22.0",
+        "sha256": "b2d2299545962a3b8ae9e9e04dcc2a158a6ee3fbae9117ef3348a118a5192ede",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library_2",
+            "@org_scala_js_scalajs_javalib",
+            "@org_scala_js_scalajs_javalib_intf",
+            "@org_scala_js_scalajs_scalalib",
+        ],
+    },
+    "org_scala_js_scalajs_linker": {
+        "artifact": "org.scala-js:scalajs-linker_3:1.22.0",
+        "sha256": "e222698a6e4cfa078bc563aa7bd7d1e849f908822135eb9e39ba4f33e28a4332",
+        "deps": [
+            "@com_google_javascript_closure_compiler",
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_js_scalajs_ir",
+            "@org_scala_js_scalajs_linker_interface",
+            "@org_scala_lang_modules_scala_parallel_collections_3",
+        ],
+    },
+    "org_scala_js_scalajs_linker_interface": {
+        "artifact": "org.scala-js:scalajs-linker-interface_3:1.22.0",
+        "sha256": "d9f47d4256839935360e44a90557f21c30800164ab72f8b21a75ee495cba75b1",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_js_scalajs_ir",
+            "@org_scala_js_scalajs_logging",
+        ],
+    },
+    "org_scala_js_scalajs_logging": {
+        "artifact": "org.scala-js:scalajs-logging_3:1.2.0",
+        "sha256": "c2e153ecece2fbe1b584faa282d81c32c17ecdb92a7d8045b90f89d712ef2692",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+        ],
+    },
+    "org_scala_js_scalajs_scalalib": {
+        "artifact": "org.scala-js:scalajs-scalalib_2.13:3.8.4",
+        "sha256": "30c470910bc2b148d5239ca56c9566ab3e7fee21f9fa58c697db72c78c7b550a",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_js_scalajs_javalib",
         ],
     },
     "org_scala_lang_scalap": {

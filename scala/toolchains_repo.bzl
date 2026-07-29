@@ -46,6 +46,8 @@ def _scala_toolchains_repo_impl(repository_ctx):
 
     if repo_attr.scala:
         toolchains["scala"] = _SCALA_TOOLCHAIN_BUILD
+    if repo_attr.scala_js:
+        toolchains["scala_js"] = _SCALA_JS_TOOLCHAIN_BUILD
     if repo_attr.scala_proto:
         toolchains["scala_proto"] = _SCALA_PROTO_TOOLCHAIN_BUILD
         format_args["scala_proto_opts"] = _stringify_args({
@@ -92,6 +94,9 @@ scala_toolchains_repo = repository_rule(
         "scala": attr.bool(
             doc = "Instantiate the Scala compiler toolchain",
             default = True,
+        ),
+        "scala_js": attr.bool(
+            doc = "Instantiate the Scala.js toolchain",
         ),
         "scalatest": attr.bool(doc = "Instantiate the ScalaTest toolchain"),
         "junit": attr.bool(doc = "Instantiate the JUnit toolchain"),
@@ -248,6 +253,71 @@ declare_deps_provider(
         for v in SCALA_VERSIONS
     }}),
 )
+"""
+
+_SCALA_JS_TOOLCHAIN_BUILD = """
+load("@rules_scala//scala:scala.bzl", "scala_binary")
+load("@rules_scala//scala:scala_cross_version.bzl", "version_suffix")
+load(
+    "@rules_scala//scala_js:repositories.bzl",
+    "SCALA_JS_SCALA_VERSION",
+    "SCALA_JS_VERSION",
+)
+load(
+    "@rules_scala//scala_js:scala_js_toolchain.bzl",
+    "scala_js_toolchain",
+)
+load("@rules_scala_config//:config.bzl", "SCALA_VERSIONS")
+
+[
+    scala_binary(
+        name = "js_linker" + version_suffix(scala_version),
+        srcs = [
+            "@rules_scala//scala_js/private/linker:ScalaJsLinker.scala",
+        ],
+        main_class = "scala.scalajs.bazel.ScalaJsLinker",
+        deps = [
+            "@org_scala_js_scalajs_linker%s//jar" % version_suffix(scala_version),
+            "@org_scala_js_scalajs_linker_interface%s//jar" % version_suffix(scala_version),
+            "@org_scala_js_scalajs_logging%s//jar" % version_suffix(scala_version),
+        ],
+        scala_version = scala_version,
+        visibility = ["//visibility:public"],
+    )
+    for scala_version in SCALA_VERSIONS
+    if scala_version == SCALA_JS_SCALA_VERSION
+]
+
+[
+    scala_js_toolchain(
+        name = "js_toolchain_impl" + version_suffix(scala_version),
+        js_libraries = [
+            "@org_scala_js_scalajs_library%s//jar" % version_suffix(scala_version),
+            "@org_scala_js_scalajs_scalalib%s//jar" % version_suffix(scala_version),
+            "@org_scala_js_scalajs_javalib%s//jar" % version_suffix(scala_version),
+            "@org_scala_js_scalajs_javalib_intf%s//jar" % version_suffix(scala_version),
+        ],
+        linker_binary = ":js_linker" + version_suffix(scala_version),
+        scala_js_version = SCALA_JS_VERSION,
+        visibility = ["//visibility:public"],
+    )
+    for scala_version in SCALA_VERSIONS
+    if scala_version == SCALA_JS_SCALA_VERSION
+]
+
+[
+    toolchain(
+        name = "js_toolchain" + version_suffix(scala_version),
+        toolchain = ":js_toolchain_impl" + version_suffix(scala_version),
+        toolchain_type = "@rules_scala//scala_js:toolchain_type",
+        target_settings = [
+            "@rules_scala_config//:scala_version" + version_suffix(scala_version),
+        ],
+        visibility = ["//visibility:public"],
+    )
+    for scala_version in SCALA_VERSIONS
+    if scala_version == SCALA_JS_SCALA_VERSION
+]
 """
 
 _TESTING_TOOLCHAIN_BUILD = """

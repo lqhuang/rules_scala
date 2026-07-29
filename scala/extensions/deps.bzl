@@ -13,6 +13,7 @@ Provides the `scala_deps` module extension with the following tag classes:
 - `scala_proto`
 - `twitter_scrooge`
 - `jmh`
+- `scala_js`
 - `scala_native`
 
 For documentation, see the `_{general,toolchain}_tag_classes` dicts and the
@@ -176,6 +177,9 @@ _toolchain_tag_classes = {
     ),
     "jmh": tag_class(
         doc = "Configures the Java Microbenchmark Harness",
+    ),
+    "scala_js": tag_class(
+        doc = "Configures the Scala.js toolchain; scala_config must select Scala 3.8.4",
     ),
     "scala_native": tag_class(
         doc = "Configures the Scala Native toolchain; scala_config must select Scala 3.8.4",
