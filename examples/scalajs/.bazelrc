@@ -1,0 +1,3 @@
+import ../../.bazelrc
+
+build --experimental_cc_static_library

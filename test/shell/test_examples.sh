@@ -159,4 +159,27 @@ test_native_example() {
   run_in_example_dir native build_native_example
 }
 
+test_scalajs_example() {
+  build_scalajs_example() {
+    bazel build //:greetings
+    jar tf bazel-bin/greetings.jar |
+      grep -Fxq 'examples/scalajs/Greeting.sjsir'
+
+    bazel build //:hello_scalajs
+    [[ -s bazel-bin/hello_scalajs.js ]]
+
+    local output
+    output="$(bazel run //:hello_scalajs -- Bazel)"
+    [[ "$output" == "Hello, Bazel!" ]]
+
+    bazel test --test_output=errors //:greetings_test
+    if bazel test --test_arg=--fail //:greetings_test; then
+      echo "expected the Scala.js assertion test to fail" >&2
+      return 1
+    fi
+  }
+
+  run_in_example_dir scalajs build_scalajs_example
+}
+
 run_tests "$test_source" "$(get_test_runner "${1:-local}")"

@@ -153,6 +153,11 @@ tasks:
     platform: ubuntu2004
     shell_commands:
       - "SCALA_NATIVE_TOOLCHAIN_MODE=hermetic RULES_SCALA_TEST_ONLY=test_native_example ./test_examples.sh"
+  scalajs_example_macos:
+    name: "Scala.js example"
+    platform: macos
+    shell_commands:
+      - "RULES_SCALA_TEST_ONLY=test_scalajs_example ./test_examples.sh"
   lint_linux:
     name: "./test_lint.sh"
     platform: ubuntu2004
