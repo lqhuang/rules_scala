@@ -162,6 +162,15 @@ def _phase_compile(
         plugins = plugins + p.semanticdb.plugin
         additional_outputs += p.semanticdb.outputs
 
+    if (hasattr(p, "scala_backend_compiler_inputs")):
+        scalacopts += p.scala_backend_compiler_inputs.scalacopts
+        plugins = plugins + p.scala_backend_compiler_inputs.plugin
+        unused_dependency_checker_ignored_targets += getattr(
+            p.scala_backend_compiler_inputs,
+            "unused_dependency_checker_ignored_targets",
+            [],
+        )
+
     out = _compile_or_empty(
         ctx,
         scalacopts,

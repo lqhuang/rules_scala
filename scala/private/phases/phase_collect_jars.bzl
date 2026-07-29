@@ -42,8 +42,12 @@ def phase_collect_jars_junit_test(ctx, p):
     )
     return _phase_collect_jars_default(ctx, p, args)
 
-def phase_collect_jars_common(ctx, p):
-    return _phase_collect_jars_default(ctx, p)
+def phase_collect_jars_common(ctx, p, extra_deps = []):
+    return _phase_collect_jars_default(
+        ctx,
+        p,
+        struct(extra_deps = extra_deps),
+    )
 
 def _phase_collect_jars_default(ctx, p, _args = struct()):
     return _phase_collect_jars(

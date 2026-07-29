@@ -49,6 +49,13 @@ _library_attrs = {
 # scala_library
 ##
 
+def _phase_scala_backend_compiler_inputs(_ctx, _p):
+    return struct(
+        plugin = [],
+        scalacopts = [],
+        unused_dependency_checker_ignored_targets = [],
+    )
+
 def _scala_library_impl(ctx):
     # Build up information from dependency-like attributes
     return run_phases(
@@ -63,6 +70,7 @@ def _scala_library_impl(ctx):
             ("collect_jars", phase_collect_jars_common),
             ("scalacopts", phase_scalacopts),
             ("semanticdb", phase_semanticdb),
+            ("scala_backend_compiler_inputs", _phase_scala_backend_compiler_inputs),
             ("compile", phase_compile_library),
             ("coverage", phase_coverage_common),
             ("merge_jars", phase_merge_jars),
@@ -102,6 +110,10 @@ def make_scala_library(*extras):
         toolchains = [
             "//scala:toolchain_type",
             "@bazel_tools//tools/jdk:toolchain_type",
+        ] + [
+            toolchain
+            for extra in extras
+            for toolchain in extra.get("toolchains", [])
         ],
         exec_groups = {"scalac": exec_group()},
         cfg = scala_version_transition,
