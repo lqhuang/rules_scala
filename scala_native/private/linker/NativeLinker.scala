@@ -12,6 +12,7 @@ object NativeLinker {
   private val joinedPathOptionPrefixes = Seq(
     "--gcc-toolchain=",
     "--sysroot=",
+    "--ld-path=",
     "-resource-dir=",
     "-iframework",
     "-isystem",
@@ -146,6 +147,13 @@ object NativeLinker {
 
   private def link(options: Options): Path = {
     val execRoot = Paths.get("").toAbsolutePath.normalize
+    for (compiler <- Seq(options.clang, options.clangPP)) {
+      val path = resolvePath(execRoot, compiler)
+      require(
+        Files.isExecutable(path),
+        s"Clang is missing or not executable: $path. Configure the Bazel C++ toolchain; automatic host discovery is disabled."
+      )
+    }
     val compileOptions =
       resolveToolchainPaths(execRoot, options.compileOptions)
     val cOptions =

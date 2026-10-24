@@ -1,3 +1,10 @@
+common --incompatible_enable_proto_toolchain_resolution
+build --@rules_scala//protoc:prefer_prebuilt_protoc
 build --experimental_cc_static_library
-build --java_runtime_version=17
-build --tool_java_runtime_version=17
+build --java_runtime_version=remotejdk_17
+build --tool_java_runtime_version=remotejdk_17
+
+build:host --@rules_scala//scala_native:toolchain_mode=host
+build:hermetic --@rules_scala//scala_native:toolchain_mode=hermetic
+build:hermetic --extra_toolchains=@toolchains_llvm_bootstrapped//toolchain:linux_x86_64_to_linux_x86_64
+build:hermetic --@toolchains_llvm_bootstrapped//config:empty_sysroot

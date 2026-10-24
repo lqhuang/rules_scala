@@ -1,5 +1,6 @@
 """Scala Native executable and test rules."""
 
+load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load("@rules_cc//cc:action_names.bzl", "ACTION_NAMES")
 load(
     "@rules_cc//cc:find_cc_toolchain.bzl",
@@ -25,6 +26,15 @@ _TOOLCHAIN_TYPE = "//scala_native:toolchain_type"
 def _scala_native_executable_impl(ctx):
     native_toolchain = ctx.toolchains[_TOOLCHAIN_TYPE]
     cc_toolchain = find_cc_toolchain(ctx)
+    hermetic = ctx.attr._toolchain_mode[BuildSettingInfo].value == "hermetic"
+    if cc_toolchain.compiler != "clang":
+        fail("Scala Native requires Clang, not %s. In host mode configure --repo_env=CC=/absolute/path/to/clang and --repo_env=CXX=/absolute/path/to/clang++." % cc_toolchain.compiler)
+    linux = ctx.target_platform_has_constraint(ctx.attr._linux[platform_common.ConstraintValueInfo])
+    x86_64 = ctx.target_platform_has_constraint(ctx.attr._x86_64[platform_common.ConstraintValueInfo])
+    macos = ctx.target_platform_has_constraint(ctx.attr._macos[platform_common.ConstraintValueInfo])
+    arm64 = ctx.target_platform_has_constraint(ctx.attr._arm64[platform_common.ConstraintValueInfo])
+    if not ((linux and x86_64) or (macos and arm64 and not hermetic)):
+        fail("Scala Native supports Linux x86_64 and macOS arm64 host mode only. On macOS select --@rules_scala//scala_native:toolchain_mode=host.")
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
         cc_toolchain = cc_toolchain,
@@ -62,6 +72,21 @@ def _scala_native_executable_impl(ctx):
         action_name = ACTION_NAMES.cpp_link_executable,
         variables = link_variables,
     )
+    if hermetic:
+        # A missing downloaded toolchain must not silently resolve to local_config_cc.
+        tool_files = cc_toolchain.all_files.to_list()
+        for compiler in [clang, clang_pp]:
+            if not any([compiler == file.path or (file.is_directory and compiler.startswith(file.path + "/")) for file in tool_files]):
+                fail("Hermetic Scala Native requires declared compiler inputs. Register the Linux x86_64 toolchains_llvm_bootstrapped toolchain, or explicitly select toolchain_mode=host for debugging.")
+        for options in [toolchain_copts, toolchain_cppopts]:
+            if "-nostdlibinc" not in options or "--sysroot=/dev/null" not in options:
+                fail("Hermetic Scala Native requires -nostdlibinc and --sysroot=/dev/null. Use toolchains_llvm_bootstrapped with empty_sysroot enabled; host fallback is disabled.")
+        if "-nostdlib" not in toolchain_linkopts or "--sysroot=/dev/null" not in toolchain_linkopts:
+            fail("Hermetic Scala Native requires -nostdlib and --sysroot=/dev/null when linking; host fallback is disabled.")
+        linkers = [file.path for file in tool_files if file.basename == "ld.lld"]
+        if len(linkers) != 1:
+            fail("Hermetic Scala Native requires exactly one declared ld.lld executable; host linker lookup is disabled.")
+        toolchain_linkopts = toolchain_linkopts + ["--ld-path=" + linkers[0]]
     action_env = dict(cc_common.get_environment_variables(
         feature_configuration = feature_configuration,
         action_name = ACTION_NAMES.c_compile,
@@ -148,6 +173,11 @@ def _scala_native_executable_impl(ctx):
     ]
 
 _attrs = {
+    "_toolchain_mode": attr.label(default = "//scala_native:toolchain_mode"),
+    "_linux": attr.label(default = "@platforms//os:linux"),
+    "_macos": attr.label(default = "@platforms//os:macos"),
+    "_x86_64": attr.label(default = "@platforms//cpu:x86_64"),
+    "_arm64": attr.label(default = "@platforms//cpu:aarch64"),
     "copts": attr.string_list(
         doc = "Options passed to clang while compiling generated native code",
     ),

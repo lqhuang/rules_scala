@@ -19,7 +19,8 @@ local_path_override(
 
 bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.3.1")
 
-register_toolchains("@toolchains_llvm_bootstrapped//toolchain:all")
+# Select the downloaded compiler explicitly with --config=hermetic. Do not
+# register it globally: host mode must use the locally configured compiler.
 
 ########################## Configure Scala ####################################
 scala_config = use_extension(

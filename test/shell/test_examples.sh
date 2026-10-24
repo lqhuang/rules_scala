@@ -123,21 +123,37 @@ test_twitter_scrooge_example() {
 
 test_native_example() {
   build_native_example() {
-    bazel build //:greetings
+    local mode="${SCALA_NATIVE_TOOLCHAIN_MODE:-host}"
+    local flags=("--config=$mode")
+    if [[ "$mode" == host ]]; then
+      flags+=("--repo_env=CC=${CC:-$(command -v clang)}"
+              "--repo_env=CXX=${CXX:-$(command -v clang++)}")
+    fi
+    bazel build "${flags[@]}" //:greetings
     jar tf bazel-bin/greetings.jar |
       grep -Fxq 'examples/native/Greetings.nir'
     jar tf bazel-bin/greetings.jar |
       grep -Fxq 'scala-native/probe.cpp'
 
     local output
-    output="$(bazel run //:hello_native -- Bazel)"
+    output="$(bazel run "${flags[@]}" //:hello_native -- Bazel)"
     [[ "$output" == "Hello, Bazel!" ]]
 
-    bazel test --test_output=errors //:greetings_test
-    if bazel test --test_arg=--fail //:greetings_test; then
+    bazel test "${flags[@]}" --test_output=errors //:greetings_test
+    local status=0
+    bazel test "${flags[@]}" --test_arg=--fail //:greetings_test || status=$?
+    if [[ "$status" != 3 ]]; then
       echo "expected the native assertion test to fail" >&2
       return 1
     fi
+    grep -Fq 'intentional failure' bazel-testlogs/greetings_test/test.log
+
+    # Without explicit registration, hermetic mode must reject the host compiler.
+    if output="$(bazel build --@rules_scala//scala_native:toolchain_mode=hermetic //:hello_native 2>&1)"; then
+      echo "hermetic mode unexpectedly accepted the host toolchain" >&2
+      return 1
+    fi
+    [[ "$output" == *"Hermetic Scala Native requires"* || "$output" == *"macOS arm64 host mode only"* || "$output" == *"Scala Native requires Clang"* ]]
   }
 
   run_in_example_dir native build_native_example

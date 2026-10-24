@@ -11,8 +11,9 @@ links those JARs into native executables.
 | Scala Native | 0.5.12 |
 | Java tool runtime | JDK 17 |
 | Native compiler | Clang/LLVM 16 or newer through a Bazel C++ toolchain |
-| Local verification | macOS arm64 |
-| Presubmit targets | Ubuntu 20.04 and macOS |
+| Local verification | macOS arm64, host toolchain |
+| Intended Linux target | Linux x86_64, host or hermetic toolchain; real-platform validation pending |
+| Presubmit targets | Ubuntu 20.04 (both modes) and macOS (host mode) |
 | Verified Bazel version | 7.7.1 |
 
 Other Scala and Scala Native version combinations are not registered.
@@ -40,6 +41,34 @@ A registered Bazel C++ toolchain must provide Clang, Clang++, platform compile
 and link options, sysroot inputs, and runtime libraries. The
 [native example](../examples/native/) uses
 `toolchains_llvm_bootstrapped` for those inputs.
+
+### Toolchain modes
+
+`--@rules_scala//scala_native:toolchain_mode=hermetic` is the default and
+supports Linux x86_64 only. Register the downloaded C++ toolchain explicitly;
+the example does this through `--config=hermetic`. Analysis rejects undeclared
+compiler paths, missing standard-search suppression flags, and missing declared
+LLD. The linker receives an explicit LLD path rather than searching host PATH.
+Keep `toolchains_llvm_bootstrapped`'s `empty_sysroot` enabled. Its declared
+headers, startup objects, libc, and C++ runtimes are the sysroot equivalent.
+
+`--@rules_scala//scala_native:toolchain_mode=host` explicitly enables the local
+C++ toolchain on Linux x86_64 or macOS arm64. Bazel discovers it using its normal
+local C++ configuration; use `--repo_env=CC=/absolute/path/to/clang` and
+`--repo_env=CXX=/absolute/path/to/clang++` to select it unambiguously. Missing
+tools are errors, not a reason to change modes. GCC is not supported.
+
+For hermetic Java compilation and linking, also set
+`--java_runtime_version=remotejdk_17` and
+`--tool_java_runtime_version=remotejdk_17`, as the example does. Numeric `17`
+alone can select a host JDK. These flags do not change JVM users' defaults.
+Bazel and the execution operating system remain bootstrap prerequisites.
+
+This is build-input isolation, not a static deployment promise. Linux output
+may require a compatible glibc loader and shared libraries. The
+[example's Linux review procedure](../examples/native/README.md#linux-review-still-required)
+records the pending runtime-baseline and reproducibility checks. Do not claim
+a measured minimum glibc version before running those checks.
 
 Load all public rules from one file:
 
@@ -127,7 +156,9 @@ for any other status. The entry point can use ordinary Scala assertions; the
 - Prebuilt NIR JAR imports are not included; dependencies must be built with
   `scala_native_library`.
 - Native optimization mode, LTO, garbage collector, and build target use Scala
-  Native defaults.
+  Native defaults (including Immix GC). Boehm and optional native dependencies
+  such as zlib are not provided; APIs requiring them are outside this MVP.
 - Arbitrary custom C++ toolchain flag encodings are not yet supported; the
-  example's `toolchains_llvm_bootstrapped` configuration is the verified path.
+  Linux hermetic integration targets `toolchains_llvm_bootstrapped` 0.3.1 and
+  still requires Linux execution validation.
 - Cross-compilation and Windows execution are not yet supported.
