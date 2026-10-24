@@ -29,6 +29,7 @@ This project defines core build rules for [Scala](https://www.scala-lang.org/) t
 - [scala_toolchain](./docs/scala_toolchain.md)
 - [scala_import](./docs/scala_import.md)
 - [scala_doc](./docs/scala_doc.md)
+- [Scala Native rules](./docs/scala_native.md)
 
 See the [docs](./docs/) directory for documentation on other `rules_scala`
 capabilities as well.

@@ -1,0 +1,3 @@
+build --experimental_cc_static_library
+build --java_runtime_version=17
+build --tool_java_runtime_version=17

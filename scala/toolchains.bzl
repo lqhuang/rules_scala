@@ -12,6 +12,7 @@ load(
 )
 load("//scala/private:toolchain_defaults.bzl", "TOOLCHAIN_DEFAULTS")
 load("//scala/scalafmt:scalafmt_repositories.bzl", "scalafmt_artifact_ids")
+load("//scala_native:repositories.bzl", "scala_native_artifact_ids")
 load("//scala_proto/default:repositories.bzl", "scala_proto_artifact_ids")
 load("//scalatest:scalatest.bzl", "scalatest_artifact_ids")
 load("//specs2:specs2.bzl", "specs2_artifact_ids")
@@ -94,7 +95,8 @@ def scala_toolchains(
         scalafmt = False,
         scala_proto = False,
         jmh = False,
-        twitter_scrooge = False):
+        twitter_scrooge = False,
+        scala_native = False):
     """Instantiates rules_scala toolchains and all their dependencies.
 
     Provides a unified interface to configuring `rules_scala` both directly in a
@@ -143,16 +145,19 @@ def scala_toolchains(
         jmh: whether to instantiate the Java Microbenchmarks Harness toolchain
         twitter_scrooge: bool or dictionary of `setup_scrooge_toolchain()`
             options
+        scala_native: whether to instantiate the Scala Native toolchain
     """
     scalafmt, scalafmt_options = _toolchain_opts(scalafmt)
     scala_proto, scala_proto_options = _toolchain_opts(scala_proto)
     twitter_scrooge, twitter_scrooge_options = _toolchain_opts(twitter_scrooge)
+    scala_native, scala_native_options = _toolchain_opts(scala_native)
 
     errors = _process_toolchain_options(
         TOOLCHAIN_DEFAULTS,
         scalafmt = scalafmt_options,
         scala_proto = scala_proto_options,
         twitter_scrooge = twitter_scrooge_options,
+        scala_native = scala_native_options,
     )
     if errors:
         fail("\n".join(errors))
@@ -210,6 +215,11 @@ def scala_toolchains(
                 for id in specs2_artifact_ids(scala_version) + specs2_junit_artifact_ids()
             })
 
+        if scala_native:
+            version_specific_artifact_ids.update({
+                id: False
+                for id in scala_native_artifact_ids(scala_version)
+            })
         all_artifacts = (
             artifact_ids_to_fetch_sources | version_specific_artifact_ids
         )
@@ -243,6 +253,7 @@ def scala_toolchains(
             k: str(v)
             for k, v in twitter_scrooge_options.items()
         },
+        scala_native = scala_native,
     )
 
 def scala_register_toolchains(name = _DEFAULT_TOOLCHAINS_REPO_NAME):

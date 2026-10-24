@@ -592,6 +592,108 @@ artifacts = {
         "sha256": "cd6916d1e622c3e662bf58d739babae022a582ec48107f5fb84b25cc56b0c3dc",
         "srcjar_sha256": "293a0e9dd418801e9dfa90d1f65d88fe0063fa2d8dc477b50aa9e5b3b68a70f4",
     },
+    "org_scala_native_nscplugin": {
+        "artifact": "org.scala-native:nscplugin_3.8.4:0.5.12",
+        "sha256": "32b4ca31131754a04ef5ae7a60b5c095743cf8cfe6089d885c7c9a41a74548fc",
+        "deps": [
+            "@io_bazel_rules_scala_scala_compiler",
+            "@io_bazel_rules_scala_scala_library",
+        ],
+    },
+    "org_scala_native_scala3lib": {
+        "artifact": "org.scala-native:scala3lib_native0.5_3:3.8.4+0.5.12",
+        "sha256": "5fb11eaf97e292217c845258d64bb02e3d9762620febfb8bf40fae339a53a065",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_native_auxlib",
+            "@org_scala_native_scalalib",
+        ],
+    },
+    "org_scala_native_scalalib": {
+        "artifact": "org.scala-native:scalalib_native0.5_3:3.8.4+0.5.12",
+        "sha256": "a700500d8b94c2ad8d3911475b3241412a4333271f58101753f93646b13dd56c",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@io_bazel_rules_scala_scala_library_2",
+            "@org_scala_native_auxlib",
+        ],
+    },
+    "org_scala_native_nativelib": {
+        "artifact": "org.scala-native:nativelib_native0.5_3:0.5.12",
+        "sha256": "b05fe9855ca50ac60854de6700f518e031df76c85021727505dab660d8757886",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+        ],
+    },
+    "org_scala_native_nir": {
+        "artifact": "org.scala-native:nir_3:0.5.12",
+        "sha256": "0495e3dd179697748bc2c0de9d339bdd3b5f0328579863ad9c5c8b1bd1b214b7",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_native_util",
+        ],
+    },
+    "org_scala_native_clib": {
+        "artifact": "org.scala-native:clib_native0.5_3:0.5.12",
+        "sha256": "c1d1ae542473bfdfacd1f27c41db2f6eae7ce665a0a61500e61d3b0e307fdad0",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_native_nativelib",
+        ],
+    },
+    "org_scala_native_posixlib": {
+        "artifact": "org.scala-native:posixlib_native0.5_3:0.5.12",
+        "sha256": "25d292daace63da5b468d82bf0f830ca381800b69c364d18f714f18f95cd5dde",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_native_clib",
+            "@org_scala_native_nativelib",
+        ],
+    },
+    "org_scala_native_windowslib": {
+        "artifact": "org.scala-native:windowslib_native0.5_3:0.5.12",
+        "sha256": "88a5664596bfb750c57946cae4c9adac30f3e696d3c57667fa57c2fdd06badac",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_native_clib",
+            "@org_scala_native_nativelib",
+        ],
+    },
+    "org_scala_native_javalib": {
+        "artifact": "org.scala-native:javalib_native0.5_3:0.5.12",
+        "sha256": "1a643e587e7e4da38a6ce989a7541df2bf5a6d290372e50765e0c78d21695af4",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_native_clib",
+            "@org_scala_native_posixlib",
+            "@org_scala_native_windowslib",
+        ],
+    },
+    "org_scala_native_auxlib": {
+        "artifact": "org.scala-native:auxlib_native0.5_3:0.5.12",
+        "sha256": "f3bd2ead9788b9c90b2758e2e1f4988168b0b65674a7a1affc485ab4661a1c29",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_native_clib",
+            "@org_scala_native_nativelib",
+        ],
+    },
+    "org_scala_native_tools": {
+        "artifact": "org.scala-native:tools_3:0.5.12",
+        "sha256": "3c0fc9d691ba46f9775c23ec044598a27d0f89df3fcaa2f25fecec38b84f53c3",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+            "@org_scala_native_nir",
+            "@org_scala_native_util",
+        ],
+    },
+    "org_scala_native_util": {
+        "artifact": "org.scala-native:util_3:0.5.12",
+        "sha256": "5bb27f5db7c9135cd820b7c9eb5af1a828e4dcf5711e3b2c710984bca9a1ea61",
+        "deps": [
+            "@io_bazel_rules_scala_scala_library",
+        ],
+    },
     "org_scalameta_common": {
         "artifact": "org.scalameta:common_2.13:4.15.0",
         "sha256": "530eaeeeebf8caf0183526fac90ca6691384840c02b390c373f685c9cf6a3a1c",

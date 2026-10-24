@@ -121,4 +121,26 @@ test_twitter_scrooge_example() {
   run_in_example_dir twitter_scrooge build_twitter_scrooge_example
 }
 
+test_native_example() {
+  build_native_example() {
+    bazel build //:greetings
+    jar tf bazel-bin/greetings.jar |
+      grep -Fxq 'examples/native/Greetings.nir'
+    jar tf bazel-bin/greetings.jar |
+      grep -Fxq 'scala-native/probe.cpp'
+
+    local output
+    output="$(bazel run //:hello_native -- Bazel)"
+    [[ "$output" == "Hello, Bazel!" ]]
+
+    bazel test --test_output=errors //:greetings_test
+    if bazel test --test_arg=--fail //:greetings_test; then
+      echo "expected the native assertion test to fail" >&2
+      return 1
+    fi
+  }
+
+  run_in_example_dir native build_native_example
+}
+
 run_tests "$test_source" "$(get_test_runner "${1:-local}")"

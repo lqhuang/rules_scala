@@ -13,6 +13,7 @@ Provides the `scala_deps` module extension with the following tag classes:
 - `scala_proto`
 - `twitter_scrooge`
 - `jmh`
+- `scala_native`
 
 For documentation, see the `_{general,toolchain}_tag_classes` dicts and the
 `_<TAG>_attrs` dict corresponding to each `<TAG>` listed above.
@@ -176,6 +177,9 @@ _toolchain_tag_classes = {
     "jmh": tag_class(
         doc = "Configures the Java Microbenchmark Harness",
     ),
+    "scala_native": tag_class(
+        doc = "Configures the Scala Native toolchain; scala_config must select Scala 3.8.4",
+    ),
 }
 
 def _toolchain_settings(module_ctx, tags, tc_names, toolchain_defaults):
@@ -241,7 +245,8 @@ def _scala_deps_impl(module_ctx):
     )
 
     nonreproducible = [
-        version for version, srcjar in compiler_srcjars.items()
+        version
+        for version, srcjar in compiler_srcjars.items()
         if (
             not srcjar.get("sha256") and
             not srcjar.get("integrity") and
