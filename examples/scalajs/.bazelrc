@@ -1,3 +1,15 @@
 import ../../.bazelrc
 
 build --experimental_cc_static_library
+build --java_runtime_version=remotejdk_17
+build --tool_java_runtime_version=remotejdk_17
+
+build:hermetic --@rules_scala//scala_js:toolchain_mode=hermetic
+build:hermetic --java_runtime_version=remotejdk_17
+build:hermetic --tool_java_runtime_version=remotejdk_17
+
+# Debug-only: explicitly opt into PATH Node and the local JDK.
+build:host --@rules_scala//scala_js:toolchain_mode=host
+build:host --extra_toolchains=//:host_node_macos_arm64,//:host_node_linux_x86_64
+build:host --java_runtime_version=local_jdk
+build:host --tool_java_runtime_version=local_jdk

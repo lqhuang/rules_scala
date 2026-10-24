@@ -10,6 +10,7 @@ examples/crossbuild
 examples/native
 examples/overridden_artifacts
 examples/scala3
+examples/scalajs
 examples/semanticdb
 examples/testing/multi_frameworks_toolchain
 examples/testing/scalatest_repositories

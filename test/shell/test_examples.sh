@@ -161,22 +161,40 @@ test_native_example() {
 
 test_scalajs_example() {
   build_scalajs_example() {
-    bazel build //:greetings
+    bazel build --config=hermetic //:greetings
     jar tf bazel-bin/greetings.jar |
       grep -Fxq 'examples/scalajs/Greeting.sjsir'
 
-    bazel build //:hello_scalajs
+    bazel build --config=hermetic //:hello_scalajs
     [[ -s bazel-bin/hello_scalajs.js ]]
 
     local output
-    output="$(bazel run //:hello_scalajs -- Bazel)"
+    output="$(bazel run --config=hermetic //:hello_scalajs -- Bazel)"
+    [[ "$output" == "Hello, Bazel!" ]]
+    # The launcher must work without any host Node on PATH.
+    output="$(PATH=/nonexistent bazel-bin/hello_scalajs Bazel)"
     [[ "$output" == "Hello, Bazel!" ]]
 
-    bazel test --test_output=errors //:greetings_test
-    if bazel test --test_arg=--fail //:greetings_test; then
+    bazel test --config=hermetic --test_output=errors //:greetings_test
+    local status=0
+    bazel test --config=hermetic --test_arg=--fail //:greetings_test || status=$?
+    if [[ "$status" != 3 ]]; then
       echo "expected the Scala.js assertion test to fail" >&2
       return 1
     fi
+    grep -Fq '[java.lang.AssertionError]: assertion failed: intentional failure' \
+      bazel-testlogs/greetings_test/test.log
+
+    if output="$(bazel build --extra_toolchains=//:host_node_macos_arm64,//:host_node_linux_x86_64 //:hello_scalajs 2>&1)"; then
+      echo "expected hermetic mode to reject host Node" >&2
+      return 1
+    fi
+    grep -Fq 'Scala.js hermetic mode requires a declared Node executable' <<< "$output"
+    if output="$(bazel build --@rules_scala//scala_js:toolchain_mode=host //:hello_scalajs 2>&1)"; then
+      echo "expected host mode to reject downloaded Node" >&2
+      return 1
+    fi
+    grep -Fq 'Scala.js host mode requires a rules_nodejs toolchain with node_path' <<< "$output"
   }
 
   run_in_example_dir scalajs build_scalajs_example

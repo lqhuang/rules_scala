@@ -1,8 +1,34 @@
+load("@rules_nodejs//nodejs:toolchain.bzl", "nodejs_toolchain")
 load(
     "@rules_scala//scala_js:scala_js.bzl",
     "scala_js_binary",
     "scala_js_library",
     "scala_js_test",
+)
+
+nodejs_toolchain(
+    name = "host_node",
+    node_path = "node",
+)
+
+toolchain(
+    name = "host_node_macos_arm64",
+    target_compatible_with = [
+        "@platforms//os:macos",
+        "@platforms//cpu:arm64",
+    ],
+    toolchain = ":host_node",
+    toolchain_type = "@rules_nodejs//nodejs:runtime_toolchain_type",
+)
+
+toolchain(
+    name = "host_node_linux_x86_64",
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    toolchain = ":host_node",
+    toolchain_type = "@rules_nodejs//nodejs:runtime_toolchain_type",
 )
 
 scala_js_library(

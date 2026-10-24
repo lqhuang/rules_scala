@@ -1,5 +1,6 @@
 """Scala.js executable and test rules."""
 
+load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load(
     "//scala:scala_cross_version.bzl",
@@ -15,6 +16,11 @@ _SCALA_JS_TOOLCHAIN_TYPE = "//scala_js:toolchain_type"
 def _scala_js_executable_impl(ctx):
     js_toolchain = ctx.toolchains[_SCALA_JS_TOOLCHAIN_TYPE]
     node = ctx.toolchains[_NODE_TOOLCHAIN_TYPE].nodeinfo
+    mode = ctx.attr._toolchain_mode[BuildSettingInfo].value
+    if mode == "hermetic" and not node.node:
+        fail("Scala.js hermetic mode requires a declared Node executable; register a downloaded rules_nodejs toolchain, or explicitly set --@rules_scala//scala_js:toolchain_mode=host for node_path.")
+    if mode == "host" and not node.node_path:
+        fail("Scala.js host mode requires a rules_nodejs toolchain with node_path; register it with --extra_toolchains, or set --@rules_scala//scala_js:toolchain_mode=hermetic.")
     classpath = depset(
         transitive = [
             library[JavaInfo].transitive_runtime_jars
@@ -53,7 +59,7 @@ def _scala_js_executable_impl(ctx):
         node_path = "$runfiles_dir/" + node_runfile
         runfiles_files.append(node.node)
     else:
-        node_path = node.node_path
+        node_path = node.node_path.replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$").replace("`", "\\`")
     ctx.actions.write(
         launcher,
         "\n".join([
@@ -83,6 +89,9 @@ _attrs = {
         doc = "Scala.js libraries to link.",
     ),
     "main_class": attr.string(mandatory = True),
+    "_toolchain_mode": attr.label(
+        default = "//scala_js:toolchain_mode",
+    ),
 }
 _attrs.update(toolchain_transition_attr)
 

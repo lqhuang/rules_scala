@@ -13,7 +13,7 @@ hermetic Node.js toolchain.
 | Node.js | 22.23.1 in the example |
 | Java tool runtime | JDK 17 |
 | Verified Bazel version | 7.7.1 |
-| Presubmit targets | Ubuntu 20.04 and macOS |
+| MVP platforms | Linux x86_64 and macOS arm64 |
 
 Other Scala and Scala.js version combinations are not registered. Scala 3 uses
 its built-in `-scalajs` backend; no compiler plugin is required.
@@ -57,6 +57,36 @@ load(
 
 The [standalone example](../examples/scalajs/) contains the complete module and
 toolchain configuration.
+
+## Select tool mode
+
+`scala_js_binary` and `scala_js_test` use the string flag
+`--@rules_scala//scala_js:toolchain_mode=hermetic` by default.
+This requires the selected `rules_nodejs` provider's `node` file and rejects a
+host-only `node_path`. The module configuration above downloads Node; it never
+falls back to a host executable if download or toolchain resolution fails.
+The provider exposes a declared file, not its provenance, so callers registering
+custom toolchains are responsible for supplying a hermetic file.
+
+For downloaded Java tools, set both flags in the consuming workspace:
+
+```text
+build --java_runtime_version=remotejdk_17
+build --tool_java_runtime_version=remotejdk_17
+```
+
+For local debugging only, set `--@rules_scala//scala_js:toolchain_mode=host`
+and explicitly select a
+`rules_nodejs` `nodejs_toolchain(node_path = ...)` runtime toolchain with
+`--extra_toolchains`. Host mode rejects a downloaded-file toolchain rather than
+silently ignoring the mode. An absolute path is recommended; `node_path = "node"`
+explicitly uses `PATH`. Host executables are not included in runfiles and must
+exist on the machine running the binary or test.
+
+The example provides `--config=hermetic` (also its default) and `--config=host`.
+The latter uses PATH Node and `local_jdk`, with runtime toolchain constraints for
+macOS arm64 and Linux x86_64. Use one config per invocation. These settings are
+local to the example and do not change pure JVM defaults.
 
 ## Compile and package a library
 
@@ -102,7 +132,8 @@ The target produces:
 
 The linker emits a single `NoModule` script with the Scala.js optimizer enabled
 and source maps disabled. The launcher obtains Node from the registered
-`rules_nodejs` runtime toolchain; it does not use a host `node` command.
+`rules_nodejs` runtime toolchain. In the default hermetic mode it includes Node
+in runfiles and does not use a host `node` command.
 
 Arguments after `bazel run //:hello --` are forwarded to Node. Scala.js
 `ModuleInitializer.mainMethodWithArgs` deliberately invokes the Scala

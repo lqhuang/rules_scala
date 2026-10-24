@@ -7,10 +7,6 @@ load(
     _collect_plus_one_deps_aspect = "collect_plus_one_deps_aspect",
 )
 load(
-    "@rules_scala//scala/private:coverage_replacements_provider.bzl",
-    _coverage_replacements_provider = "coverage_replacements_provider",
-)
-load(
     "@rules_scala//scala/private:phases/phase_collect_jars.bzl",
     "phase_collect_jars_common",
 )
@@ -89,13 +85,11 @@ _JS_LIBRARY = {
         "deps": attr.label_list(
             aspects = [
                 _collect_plus_one_deps_aspect,
-                _coverage_replacements_provider.aspect,
             ],
             providers = [ScalaJsInfo],
         ),
         "exports": attr.label_list(
             allow_files = False,
-            aspects = [_coverage_replacements_provider.aspect],
             providers = [ScalaJsInfo],
         ),
         "runtime_deps": attr.label_list(providers = [ScalaJsInfo]),

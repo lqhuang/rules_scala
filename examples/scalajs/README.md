@@ -6,10 +6,35 @@ JavaScript program, and runs an assertion test with hermetic Node.js.
 ## Prerequisites
 
 - Bazelisk or Bazel 7.7.1
-- JDK 17
-- Linux or macOS
+- Linux x86_64 or macOS arm64
+- A JDK's `jar` command for the optional JAR inspection below
 
-The first build downloads Scala, Scala.js, Node.js, and the configured JDK.
+The first build downloads Scala, Scala.js, Node.js, and JDK 17. Both Java runtime
+flags are pinned to `remotejdk_17` in this example, without changing JVM defaults
+elsewhere in the checkout. A failed download does not fall back to host tools.
+
+## Select hermetic or host tools
+
+Hermetic mode is the default. To request it explicitly:
+
+```sh
+bazel run --config=hermetic //:hello_scalajs -- Bazel
+bazel test --config=hermetic //:greetings_test
+```
+
+For local debugging with Node on `PATH` and a local JDK 17 or 21 selected by
+`JAVA_HOME`:
+
+```sh
+bazel run --config=host //:hello_scalajs -- Bazel
+bazel test --config=host --test_env=PATH //:greetings_test
+```
+
+Host mode explicitly selects a `rules_nodejs` `node_path` toolchain and
+`local_jdk`. It is not reproducible and requires those tools on the execution
+machine. The example constrains host Node to macOS arm64 and Linux x86_64.
+Use only one config per invocation. Selecting host Node without host mode, or
+host mode without a host Node toolchain, fails during analysis.
 
 ## Build the library package
 
